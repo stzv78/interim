@@ -1,7 +1,11 @@
 package ru.netology.hw3.app.repository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.io.BufferedReader;
@@ -12,10 +16,16 @@ import java.util.stream.Collectors;
 
 @Repository
 public class DataBaseRepository {
+    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
     private final String query;
 
-    public DataBaseRepository() {
-        query = read("script.sql");
+    @Autowired
+    public DataBaseRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        this.query = read("script.sql");
     }
 
     private static String read(String scriptFileName) {
@@ -29,12 +39,7 @@ public class DataBaseRepository {
 
     public String getProductName(String name)
     {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate();
-
-        jdbcTemplate.setDataSource(dataSource);
-
-        jdbcTemplate.query(query,name);
-
-        return productName;
+        SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("name", name);
+        return namedParameterJdbcTemplate.queryForObject(this.query, namedParameters, String.class);
     }
 }

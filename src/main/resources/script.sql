@@ -1,4 +1,4 @@
-SELECT O.product_name, C.name
+SELECT O.product_name
 FROM ORDERS O
          INNER JOIN CUSTOMERS C
                     ON O.customer_id = C.id
